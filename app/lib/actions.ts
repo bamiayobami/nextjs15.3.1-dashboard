@@ -29,7 +29,8 @@ const FormSchema = z.object({
   }),
   date: z.string(),
 });
-
+ 
+// Use Zod to update the expected types
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
  
 export async function createInvoice(prevState: State, formData: FormData) {
@@ -42,6 +43,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
  
   // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
+    // console.log('validatedFields', validatedFields); // Log the errors for debugging///
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Create Invoice.',
@@ -70,32 +72,15 @@ export async function createInvoice(prevState: State, formData: FormData) {
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
-
 // Use Zod to update the expected types
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
   
-export async function updateInvoice(prevState: State, id: string, formData: FormData) {
-  const validatedFields = UpdateInvoice.safeParse({
+export async function updateInvoice(id: string, formData: FormData) {
+  const { customerId, amount, status } = UpdateInvoice.parse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
-
-  if(!validatedFields.success) {
-    console.log('validatedFields', validatedFields); // Log the errors for debugging
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Edit Invoice.',
-    };
-  }
-  
-  console.log('validatedFieldsData', validatedFields.data); // Log the validated data for debugging
-  const { customerId, amount, status } = validatedFields.data;
-  // UpdateInvoice.parse({
-  //   customerId: formData.get('customerId'),
-  //   amount: formData.get('amount'),
-  //   status: formData.get('status'),
-  // });
  
   const amountInCents = amount * 100;
  
